@@ -44,12 +44,24 @@ async function put(r: { access_token: string; refresh_token: string; expires_in:
 }
 
 async function authCall(path: string, body: unknown) {
-  let res: Response;
-  try {
-    res = await fetch(`${server}/v1/auth/${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  } catch {
-    throw new Error(`Can't reach the server at ${server}. Check the address and your Wi-Fi.`);
+  // Free hosting sleeps when idle and needs up to a minute to wake: poke it first and retry instead of failing.
+  const timed = (url: string, init: RequestInit, ms: number) => {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), ms);
+    return fetch(url, { ...init, signal: ctl.signal }).finally(() => clearTimeout(t));
+  };
+  let res: Response | null = null;
+  for (let i = 0; i < 5 && !res; i++) {
+    try {
+      const r = await timed(`${server}/v1/auth/${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }, 30_000);
+      if ([502, 503, 504].includes(r.status)) throw new Error("waking");
+      res = r;
+    } catch {
+      if (i === 4) throw new Error("Can't reach the server right now. Check your internet connection and try again.");
+      await new Promise((ok) => setTimeout(ok, 2000 * (i + 1)));
+    }
   }
+  if (!res) throw new Error("Can't reach the server right now. Check your internet connection and try again.");
   const j = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(typeof j.detail === "string" ? j.detail : "Something went wrong. Please try again.");
   return j;

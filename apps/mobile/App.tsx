@@ -10,6 +10,7 @@ import { ApiError, call, type MyFamily, type Person, type Session } from "./src/
 import { forgetFamily, getServer, getUser, hasSeenWelcome, logout, markWelcomeSeen, onAuthChange, restore, savedFamily, saveFamily } from "./src/auth";
 import { Mitthu } from "./src/components/Mitthu";
 import { SosOverlay } from "./src/components/SosOverlay";
+import { ConnectionBanner } from "./src/components/ConnectionBanner";
 import { UpdateBanner } from "./src/components/UpdateBanner";
 import { AuthScreen } from "./src/screens/AuthScreen";
 import { Family } from "./src/screens/Family";
@@ -150,6 +151,7 @@ function Root() {
     <>
       <StatusBar style={phase === "welcome" ? "dark" : scheme === "dark" ? "light" : "dark"} />
       <UpdateBanner />
+      <ConnectionBanner />
       {phase === "welcome" && <Welcome onStart={() => { void markWelcomeSeen(); setAuthMode("up"); setPhase("auth"); }} onHaveAccount={() => { void markWelcomeSeen(); setAuthMode("in"); setPhase("auth"); }} />}
       {phase === "auth" && <AuthScreen key={authMode} initialMode={authMode} notice={notice} onBack={() => setPhase("welcome")} onDone={() => { setNotice(null); void loadFamilies(); }} />}
       {phase === "setup" && <FamilySetup userName={getUser()?.name || getUser()?.email} onSignOut={signOut} onDone={async (id) => { await saveFamily(id); await loadFamilies(); }} />}

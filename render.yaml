@@ -7,6 +7,7 @@ services:
     dockerfilePath: ./services/api/Dockerfile
     dockerContext: ./services/api
     plan: free
+    region: singapore            # closest Render region to the Mumbai database; a US region makes every query slow
     healthCheckPath: /v1/health
     envVars:
       - key: LLM_PROVIDER

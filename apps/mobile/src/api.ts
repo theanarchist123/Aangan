@@ -45,21 +45,63 @@ async function send(path: string, method: string, body: unknown, token: string |
   } finally { clearTimeout(timer); }
 }
 
-/** Authenticated API call. Refreshes an expired token once; a dead session signs the user out (see onAuthChange). */
-export async function call<T>(_s: unknown, path: string, method = "GET", body?: unknown, timeoutMs = 30_000): Promise<T> {
-  let token = await getAccessToken();
-  let res: Response;
-  try {
-    res = await send(path, method, body, token, timeoutMs);
-    if (res.status === 401 && token) {
-      token = await getAccessToken(true);
-      if (token) res = await send(path, method, body, token, timeoutMs);
-    }
-  } catch (e) {
-    const timedOut = e instanceof Error && e.name === "AbortError";
-    throw new ApiError(0, timedOut ? "The server took too long to answer. Check your connection and try again."
-      : `Can't reach the server at ${getServer()}. Check the address, the Wi-Fi, and that the API is running.`);
+// ---- Free hosting sleeps after ~15 min idle and takes up to a minute to wake. These helpers make that invisible. ----
+let lastOk = 0;
+let waking = false;
+const wakeListeners = new Set<(w: boolean) => void>();
+function setWaking(v: boolean) { if (waking !== v) { waking = v; wakeListeners.forEach((f) => f(v)); } }
+/** Subscribe to "the server is waking up" (true) / "back" (false). Returns an unsubscribe function. */
+export function onWaking(fn: (w: boolean) => void) { wakeListeners.add(fn); fn(waking); return () => { wakeListeners.delete(fn); }; }
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Poke the server until it answers (a cold start can take ~60 s). Safe to call anytime. */
+async function wake(): Promise<void> {
+  for (let i = 0; i < 5; i++) {
+    try {
+      const res = await send("/health", "GET", undefined, null, 20_000);
+      if (res.ok) { lastOk = Date.now(); setWaking(false); return; }
+    } catch {}
+    setWaking(true);
+    await sleep(2000);
   }
+}
+
+/**
+ * Authenticated API call. Refreshes an expired token once; a dead session signs the user out (see onAuthChange).
+ * Reads (GET) retry quietly through network blips and a sleeping server. Writes never replay a request that might have
+ * reached the server: if the server has been idle we wake it first, then send exactly once.
+ */
+export async function call<T>(_s: unknown, path: string, method = "GET", body?: unknown, timeoutMs = 25_000): Promise<T> {
+  const isGet = method === "GET";
+  if (!isGet && Date.now() - lastOk > 120_000) await wake();
+  const attempts = isGet ? 4 : 2;
+  let res: Response | null = null;
+  let failure: unknown = null;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      let token = await getAccessToken();
+      res = await send(path, method, body, token, timeoutMs);
+      if (res.status === 401 && token) {
+        token = await getAccessToken(true);
+        if (token) res = await send(path, method, body, token, timeoutMs);
+      }
+      failure = null;
+      // 502/503/504 come from the hosting proxy while the server is starting, so the request never ran: safe to retry.
+      if ([502, 503, 504].includes(res.status) && i < attempts - 1) { setWaking(true); await sleep(1500 * 2 ** i); continue; }
+      break;
+    } catch (e) {
+      failure = e; res = null;
+      if (isGet && i < attempts - 1) { setWaking(true); await sleep(1500 * 2 ** i); continue; }
+      break;
+    }
+  }
+  if (!res) {
+    setWaking(false);
+    const timedOut = failure instanceof Error && failure.name === "AbortError";
+    throw new ApiError(0, timedOut ? "The server is slow to answer. Please try again in a moment."
+      : "Can't reach the server right now. Check your internet connection and try again.");
+  }
+  if (res.ok) { lastOk = Date.now(); setWaking(false); }
   if (!res.ok) {
     let detail = res.statusText;
     try {

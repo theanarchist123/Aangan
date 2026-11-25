@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState } from "react-native";
 import { call, ApiError, type Approval, type AuditEntry, type Consent, type Doc, type FamilyInfo, type Notice, type Person, type Session, type Story, type Task } from "./api";
 
 export type FamilyData = {
@@ -14,9 +15,13 @@ export function useFamily(sess: Session | null) {
   const [error, setError] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
   const alive = useRef(true);
+  const inflight = useRef(false);
+  const loaded = useRef(false);
+  const busy = useRef(false);
 
   const refresh = useCallback(async () => {
-    if (!sess) return;
+    if (!sess || inflight.current) return; // never stack requests on a slow server
+    inflight.current = true;
     const id = sess.familyId;
     try {
       const [family, people, tasks, approvals, notices, digest, docs, consents, audit] = await Promise.all([
@@ -32,21 +37,29 @@ export function useFamily(sess: Session | null) {
       ]);
       if (!alive.current) return;
       setData({ family, people, tasks, approvals, notices, stories: digest.stories, docs, consents, audit });
+      loaded.current = true;
+      busy.current = tasks.some((t) => t.status === "running" || t.status === "awaiting_approval");
       setError(null);
     } catch (e) {
       if (!alive.current) return;
       if (e instanceof ApiError && e.status === 404) setGone(true);
-      else setError(e instanceof Error ? e.message : "Something went wrong");
+      else if (!loaded.current) setError(e instanceof Error ? e.message : "Something went wrong"); // after first load, keep showing what we have
     } finally {
+      inflight.current = false;
       if (alive.current) setLoading(false);
     }
   }, [sess]);
 
   useEffect(() => {
     alive.current = true;
+    loaded.current = false;
     void refresh();
-    const t = setInterval(refresh, 4000);
-    return () => { alive.current = false; clearInterval(t); };
+    // Fast while an emergency/task is moving, relaxed otherwise, and paused while the app is in the background.
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => { if (AppState.currentState === "active") void refresh(); timer = setTimeout(tick, busy.current ? 5000 : 20000); };
+    timer = setTimeout(tick, 20000);
+    const sub = AppState.addEventListener("change", (st) => { if (st === "active") void refresh(); });
+    return () => { alive.current = false; clearTimeout(timer); sub.remove(); };
   }, [refresh]);
 
   return { data, loading, error, gone, refresh };
