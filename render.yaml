@@ -25,6 +25,20 @@ services:
         sync: false
       - key: SARVAM_API_KEY
         sync: false
+      # Website origin(s) allowed to call this API, comma-separated, no spaces, no trailing slash
+      - key: CORS_ORIGINS
+        value: https://web-six-mocha-19.vercel.app,http://localhost:3000
+      # In-app update prompt: set when you publish a new APK (see docs/UPDATING_THE_APP.md)
+      - key: APP_LATEST_VERSION_CODE
+        value: "1"
+      - key: APP_LATEST_VERSION_NAME
+        value: "1.0.0"
+      - key: APP_MIN_VERSION_CODE
+        value: "1"
+      - key: APP_APK_URL
+        value: ""
+      - key: APP_RELEASE_NOTES
+        value: ""
       # Optional: only if you want WhatsApp to work from the hosted server
       - key: WHATSAPP_VERIFY_TOKEN
         sync: false

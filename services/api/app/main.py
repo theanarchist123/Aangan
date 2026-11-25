@@ -56,8 +56,12 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Aangan API", version="0.1.0", lifespan=lifespan,
               description="Agentic family-care platform for NRIs: data vault, agent engine, safety gates.")
-app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins.split(","), allow_methods=["*"],
-                   allow_headers=["*"])
+# Tolerate stray spaces, quotes, newlines and trailing slashes in the CORS_ORIGINS env var.
+_origins = [o.strip().strip("\"'").rstrip("/") for o in settings.cors_origins.replace("\n", ",").split(",")]
+app.add_middleware(CORSMiddleware, allow_origins=[o for o in _origins if o], allow_methods=["*"],
+                   allow_headers=["*"],
+                   # The site's own Vercel deployments (production + previews), e.g. web-six-mocha-19.vercel.app
+                   allow_origin_regex=r"https://web-[a-z0-9-]+\.vercel\.app")
 app.include_router(auth_router, prefix="/v1")
 app.include_router(router, prefix="/v1")
 app.include_router(media_router, prefix="/v1")
