@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/* Aangan design tokens: warm, home-like, calm. SOS red is reserved for emergencies only. */
+:root {
+  --teal: #0e5e6f;
+  --teal-soft: #d9ecef;
+  --marigold: #f4a300;
+  --marigold-soft: #ffeec7;
+  --ivory: #fff8ee;
+  --card: #ffffff;
+  --terracotta: #c8553d;
+  --parrot: #3fa34d;
+  --ink: #1f2a2e;
+  --muted: #5e6c70;
+  --line: #eadfce;
+  --sos: #d62828;
+  --background: var(--ivory);
+  --foreground: var(--ink);
+}
+
+/* Dark theme: follows the system unless the user picked a theme with the toggle (data-theme on <html>). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ivory: #12161c;
+    --card: #1b212a;
+    --teal-soft: #17323a;
+    --marigold-soft: #3a2d0c;
+    --ink: #f4efe6;
+    --muted: #a3afb3;
+    --line: #2b3440;
+    --teal: #4fb3c6;
+  }
+}
+:root[data-theme="dark"] {
+  --ivory: #12161c;
+  --card: #1b212a;
+  --teal-soft: #17323a;
+  --marigold-soft: #3a2d0c;
+  --ink: #f4efe6;
+  --muted: #a3afb3;
+  --line: #2b3440;
+  --teal: #4fb3c6;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+@theme inline {
+  --color-teal: var(--teal);
+  --color-teal-soft: var(--teal-soft);
+  --color-marigold: var(--marigold);
+  --color-marigold-soft: var(--marigold-soft);
+  --color-ivory: var(--ivory);
+  --color-card: var(--card);
+  --color-terracotta: var(--terracotta);
+  --color-parrot: var(--parrot);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-sos: var(--sos);
+  --font-sans: var(--font-jakarta), "Noto Sans", system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --radius-card: 20px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Rangoli-style dotted pattern for empty states and hero backgrounds */
+.rangoli {
+  background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--teal) 22%, transparent) 1.4px, transparent 0);
+  background-size: 22px 22px;
+}
+
+@layer components {
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 1px 2px rgb(31 42 46 / 0.04), 0 8px 24px -12px rgb(31 42 46 / 0.12);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s;
+  cursor: pointer;
+}
+.btn:active { transform: scale(0.97); }
+.btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--marigold);
+  outline-offset: 2px;
+}
+.btn-primary { background: var(--marigold); color: #2a1c00; box-shadow: 0 6px 16px -6px rgb(244 163 0 / 0.7); }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-ghost { background: transparent; border: 1.5px solid var(--line); color: var(--ink); }
+.btn-sos { background: var(--sos); color: #fff; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.sky-day { background: linear-gradient(180deg, #8fd3ff 0%, #ffeec7 100%); }
+.sky-dusk { background: linear-gradient(180deg, #f6a96b 0%, #ffd9a0 100%); }
+.sky-night { background: linear-gradient(180deg, #14224a 0%, #31407a 100%); }
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton {
+  background: linear-gradient(90deg, var(--line) 25%, var(--card) 50%, var(--line) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

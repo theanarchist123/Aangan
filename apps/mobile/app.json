@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "Aangan",
+    "slug": "aangan",
+    "scheme": "aangan",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aangan.app",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Aangan uses Face ID to confirm approvals and open the family vault."
+      }
+    },
+    "android": {
+      "package": "com.aangan.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF1D6",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#FFF8EE",
+          "dark": { "image": "./assets/splash-icon.png", "backgroundColor": "#12161C" }
+        }
+      ],
+      ["expo-audio", { "microphonePermission": "Aangan uses the microphone so you can speak your requests in Hindi, Marathi, Tamil and more." }],
+      ["expo-image-picker", { "cameraPermission": "Aangan uses the camera to scan prescriptions, bills and policies into the family vault.", "photosPermission": "Aangan lets you choose a photo of a document to add to the family vault." }],
+      ["expo-local-authentication", { "faceIDPermission": "Aangan uses Face ID to confirm approvals and open the family vault." }],
+      ["expo-build-properties", { "android": { "usesCleartextTraffic": true, "buildArchs": ["arm64-v8a"] } }],
+      "./plugins/withReleaseSigning.js"
+    ]
+  }
+}

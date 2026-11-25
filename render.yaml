@@ -1,0 +1,38 @@
+# One-click hosting of the Aangan API on Render (free plan). In Render: New > Blueprint > pick this repo.
+# Render asks you to paste each secret below once (they are the same values as in services/api/.env).
+services:
+  - type: web
+    name: aangan-api
+    runtime: docker
+    dockerfilePath: ./services/api/Dockerfile
+    dockerContext: ./services/api
+    plan: free
+    healthCheckPath: /v1/health
+    envVars:
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: SIGNING_SECRET
+        generateValue: true
+      - key: DATABASE_URL          # postgresql+asyncpg://postgres.<ref>:<password>@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?ssl=require
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false
+      # Optional: only if you want WhatsApp to work from the hosted server
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_ALLOWED_RECIPIENTS
+        sync: false

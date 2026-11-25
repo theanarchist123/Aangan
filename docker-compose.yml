@@ -1,0 +1,13 @@
+# Local dev stack. The API defaults to SQLite so this is optional; use it to run against Postgres + pgvector.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_PASSWORD: aangan
+      POSTGRES_DB: aangan
+    ports: ["5432:5432"]
+    volumes:
+      - ./supabase/migrations:/docker-entrypoint-initdb.d:ro
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
