@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" width="1200" height="650" font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+<defs><filter id="sh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#5a3b05" flood-opacity=".12"/></filter></defs>
+<rect width="1200" height="650" rx="28" fill="#FFF8EE"/>
+<g filter="url(#sh)"><rect x="30" y="30" width="370" height="280" rx="24" fill="#fff"/></g>
+<path d="M30,54 a24,24 0 0 1 24,-24 h322 a24,24 0 0 1 24,24 v4 h-370z" fill="#14B8A6" opacity=".9"/>
+<circle cx="92" cy="114" r="32" fill="#14B8A6"/><g transform="translate(92 114)"><rect x="-7" y="-19" width="14" height="24" rx="7" fill="#fff"/><path d="M-13,-2 Q-13,15 0,15 Q13,15 13,-2" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M0,15 v8 M-7,23 h14" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>
+<text x="142" y="122" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#134E4A">Just say it</text>
+<text x="60" y="180" font-size="14.5" fill="#4B4535">Speak or type in Hindi, Marathi,</text>
+<text x="60" y="204" font-size="14.5" fill="#4B4535">Tamil, or a mix. Voice notes and</text>
+<text x="60" y="228" font-size="14.5" fill="#4B4535">WhatsApp messages both work.</text>
+<rect x="60" y="258" width="213" height="28" rx="14" fill="#14B8A6" opacity=".13"/>
+<text x="167" y="277" text-anchor="middle" font-size="12" font-weight="700" fill="#14B8A6">Sarvam · ffmpeg · WhatsApp</text>
+<g filter="url(#sh)"><rect x="425" y="30" width="370" height="280" rx="24" fill="#fff"/></g>
+<path d="M425,54 a24,24 0 0 1 24,-24 h322 a24,24 0 0 1 24,24 v4 h-370z" fill="#FF8A3D" opacity=".9"/>
+<circle cx="487" cy="114" r="32" fill="#FF8A3D"/><g transform="translate(487 114)"><path d="M-13,-20 h15 l11,11 v28 a2,2 0 0 1 -2,2 h-22 a2,2 0 0 1 -2,-2z" fill="#fff"/><path d="M2,-20 v11 h11" fill="#FF8A3D" opacity=".35"/><path d="M-8,-2 h14 M-8,5 h14 M-8,12 h8" stroke="#FF8A3D" stroke-width="2.6" stroke-linecap="round"/></g>
+<text x="537" y="122" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#134E4A">A vault that reads</text>
+<text x="455" y="180" font-size="14.5" fill="#4B4535">Snap a bill or upload a PDF. Gemini</text>
+<text x="455" y="204" font-size="14.5" fill="#4B4535">reads dates and amounts. Aadhaar</text>
+<text x="455" y="228" font-size="14.5" fill="#4B4535">and PAN are redacted automatically.</text>
+<rect x="455" y="258" width="206" height="28" rx="14" fill="#FF8A3D" opacity=".13"/>
+<text x="558" y="277" text-anchor="middle" font-size="12" font-weight="700" fill="#FF8A3D">Gemini · Supabase Storage</text>
+<g filter="url(#sh)"><rect x="820" y="30" width="370" height="280" rx="24" fill="#fff"/></g>
+<path d="M820,54 a24,24 0 0 1 24,-24 h322 a24,24 0 0 1 24,24 v4 h-370z" fill="#16A34A" opacity=".9"/>
+<circle cx="882" cy="114" r="32" fill="#16A34A"/><g transform="translate(882 114)"><path d="M0,-21 L17,-14 V2 Q17,15 0,23 Q-17,15 -17,2 V-14Z" fill="#fff"/><path d="M-7,1 l5,5 l10,-11" stroke="#16A34A" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="932" y="122" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#134E4A">Guardian, always on</text>
+<text x="850" y="180" font-size="14.5" fill="#4B4535">Hourly watch for expiring policies,</text>
+<text x="850" y="204" font-size="14.5" fill="#4B4535">due bills and missed check-ins.</text>
+<text x="850" y="228" font-size="14.5" fill="#4B4535">Never the same alert twice in 24 h.</text>
+<rect x="850" y="258" width="141" height="28" rx="14" fill="#16A34A" opacity=".13"/>
+<text x="921" y="277" text-anchor="middle" font-size="12" font-weight="700" fill="#16A34A">Background agent</text>
+<g filter="url(#sh)"><rect x="30" y="335" width="370" height="280" rx="24" fill="#fff"/></g>
+<path d="M30,359 a24,24 0 0 1 24,-24 h322 a24,24 0 0 1 24,24 v4 h-370z" fill="#EF476F" opacity=".9"/>
+<circle cx="92" cy="419" r="32" fill="#EF476F"/><g transform="translate(92 419)"><circle r="32" fill="none" stroke="#EF476F" stroke-width="3"><animate attributeName="r" values="32;48" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values=".7;0" dur="1.8s" repeatCount="indefinite"/></circle><text y="6" text-anchor="middle" font-size="17" font-weight="800" fill="#fff" letter-spacing=".5">SOS</text></g>
+<text x="142" y="427" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#134E4A">One-tap SOS</text>
+<text x="60" y="485" font-size="14.5" fill="#4B4535">No LLM in the loop. Nearest real</text>
+<text x="60" y="509" font-size="14.5" fill="#4B4535">hospitals, every contact alerted,</text>
+<text x="60" y="533" font-size="14.5" fill="#4B4535">desk escalation after 30 seconds.</text>
+<rect x="60" y="563" width="199" height="28" rx="14" fill="#EF476F" opacity=".13"/>
+<text x="159" y="582" text-anchor="middle" font-size="12" font-weight="700" fill="#EF476F">OpenStreetMap · watchdog</text>
+<g filter="url(#sh)"><rect x="425" y="335" width="370" height="280" rx="24" fill="#fff"/></g>
+<path d="M425,359 a24,24 0 0 1 24,-24 h322 a24,24 0 0 1 24,24 v4 h-370z" fill="#6C5CE7" opacity=".9"/>
+<circle cx="487" cy="419" r="32" fill="#6C5CE7"/><g transform="translate(487 419)"><circle cx="-13" cy="-9" r="6" fill="#fff" opacity=".85"/><circle cx="13" cy="-9" r="6" fill="#fff" opacity=".85"/><circle cx="0" cy="-12" r="7.5" fill="#fff"/><path d="M-23,14 Q-13,-2 -3,14Z M3,14 Q13,-2 23,14Z" fill="#fff" opacity=".85"/><path d="M-12,18 Q0,-2 12,18Z" fill="#fff"/></g>
+<text x="537" y="427" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#134E4A">Roles with teeth</text>
+<text x="455" y="485" font-size="14.5" fill="#4B4535">Sponsors decide money and consent.</text>
+<text x="455" y="509" font-size="14.5" fill="#4B4535">Relatives view and create. Parents</text>
+<text x="455" y="533" font-size="14.5" fill="#4B4535">check in, log medicines, raise SOS.</text>
+<rect x="455" y="563" width="156" height="28" rx="14" fill="#6C5CE7" opacity=".13"/>
+<text x="533" y="582" text-anchor="middle" font-size="12" font-weight="700" fill="#6C5CE7">Row-level security</text>
+<g filter="url(#sh)"><rect x="820" y="335" width="370" height="280" rx="24" fill="#fff"/></g>
+<path d="M820,359 a24,24 0 0 1 24,-24 h322 a24,24 0 0 1 24,24 v4 h-370z" fill="#0F766E" opacity=".9"/>
+<circle cx="882" cy="419" r="32" fill="#0F766E"/><g transform="translate(882 419)"><rect x="-19" y="-19" width="38" height="38" rx="10" fill="#fff"/><path d="M0,-10 v20 M-10,0 h20" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/></g>
+<text x="932" y="427" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#134E4A">Hospital-ready</text>
+<text x="850" y="485" font-size="14.5" fill="#4B4535">A consent-gated medical packet, FHIR R4</text>
+<text x="850" y="509" font-size="14.5" fill="#4B4535">bundles, signed webhooks and a</text>
+<text x="850" y="533" font-size="14.5" fill="#4B4535">metered Partner API.</text>
+<rect x="850" y="563" width="177" height="28" rx="14" fill="#0F766E" opacity=".13"/>
+<text x="939" y="582" text-anchor="middle" font-size="12" font-weight="700" fill="#0F766E">FHIR R4 · Partner API</text>
+</svg>

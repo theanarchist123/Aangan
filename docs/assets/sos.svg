@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" width="1200" height="280" font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+<defs><filter id="sh" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#5a0f23" flood-opacity=".2"/></filter></defs>
+<rect width="1200" height="280" rx="28" fill="#1B1520"/>
+<text x="40" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="700" fill="#fff">When someone taps SOS</text>
+<text x="40" y="76" font-size="13.5" fill="#C9B8D4">No model, no waiting. Every step is plain code.</text>
+<path d="M100,150 H1100" stroke="#3A2D45" stroke-width="6" stroke-linecap="round"/>
+<path d="M100,150 H1100" stroke="#EF476F" stroke-width="6" stroke-linecap="round" stroke-dasharray="1000" stroke-dashoffset="1000"><animate attributeName="stroke-dashoffset" values="1000;0;0;1000" keyTimes="0;0.7;0.9;1" dur="7s" repeatCount="indefinite"/></path>
+<circle cx="100" cy="150" r="15" fill="#EF476F" filter="url(#sh)"><animate attributeName="r" values="15;19;15" dur="7s" begin="0.0s" repeatCount="indefinite" keyTimes="0;.08;.16" calcMode="linear"/></circle><text x="100" y="155" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">1</text>
+<text x="100" y="116" text-anchor="middle" font-size="12.5" font-weight="800" fill="#F5A524" letter-spacing="1">0 S</text>
+<text x="100" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Tap SOS</text>
+<text x="100" y="218" text-anchor="middle" font-size="12" fill="#C9B8D4">one button, any screen</text>
+<circle cx="340" cy="150" r="15" fill="#EF476F" filter="url(#sh)"><animate attributeName="r" values="15;19;15" dur="7s" begin="1.0s" repeatCount="indefinite" keyTimes="0;.08;.16" calcMode="linear"/></circle><text x="340" y="155" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">2</text>
+<text x="340" y="116" text-anchor="middle" font-size="12.5" font-weight="800" fill="#F5A524" letter-spacing="1">INSTANTLY</text>
+<text x="340" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Fixed plan runs</text>
+<text x="340" y="218" text-anchor="middle" font-size="12" fill="#C9B8D4">no LLM is ever called</text>
+<circle cx="580" cy="150" r="15" fill="#EF476F" filter="url(#sh)"><animate attributeName="r" values="15;19;15" dur="7s" begin="2.0s" repeatCount="indefinite" keyTimes="0;.08;.16" calcMode="linear"/></circle><text x="580" y="155" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">3</text>
+<text x="580" y="116" text-anchor="middle" font-size="12.5" font-weight="800" fill="#F5A524" letter-spacing="1">WITHIN 4 S</text>
+<text x="580" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Hospitals found</text>
+<text x="580" y="218" text-anchor="middle" font-size="12" fill="#C9B8D4">nearest real ones, live map data</text>
+<circle cx="820" cy="150" r="15" fill="#EF476F" filter="url(#sh)"><animate attributeName="r" values="15;19;15" dur="7s" begin="3.0s" repeatCount="indefinite" keyTimes="0;.08;.16" calcMode="linear"/></circle><text x="820" y="155" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">4</text>
+<text x="820" y="116" text-anchor="middle" font-size="12.5" font-weight="800" fill="#F5A524" letter-spacing="1">0 TO 30 S</text>
+<text x="820" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Contacts alerted</text>
+<text x="820" y="218" text-anchor="middle" font-size="12" fill="#C9B8D4">push + WhatsApp, delivery logged</text>
+<circle cx="1060" cy="150" r="15" fill="#F5A524" filter="url(#sh)"><animate attributeName="r" values="15;19;15" dur="7s" begin="4.0s" repeatCount="indefinite" keyTimes="0;.08;.16" calcMode="linear"/></circle><text x="1060" y="155" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">5</text>
+<text x="1060" y="116" text-anchor="middle" font-size="12.5" font-weight="800" fill="#F5A524" letter-spacing="1">30 S</text>
+<text x="1060" y="196" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Desk escalation</text>
+<text x="1060" y="218" text-anchor="middle" font-size="12" fill="#C9B8D4">if nothing moved, the desk is paged</text>
+<circle r="8" fill="#fff"><animateMotion dur="7s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;0.7;1" calcMode="linear" path="M100,150 H1100"/></circle>
+</svg>
