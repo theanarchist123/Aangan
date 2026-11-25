@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     supabase_anon_key: str = ""
     live_lookups: bool = True  # OpenStreetMap hospitals + Open-Meteo weather; tests turn this off
     guardian_interval_minutes: int = 60
+    # In-app "new version available" prompt (set these on the host when you publish a new APK)
+    app_latest_version_code: int = 1
+    app_latest_version_name: str = "1.0.0"
+    app_min_version_code: int = 1  # builds older than this are asked to update before they can continue
+    app_apk_url: str = ""
+    app_release_notes: str = ""
     enable_dev_endpoints: bool = False  # simulate-inbound endpoints; must stay off in production
     # WhatsApp Cloud API
     whatsapp_verify_token: str = ""

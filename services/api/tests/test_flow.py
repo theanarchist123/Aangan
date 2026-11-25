@@ -192,3 +192,19 @@ async def test_sos_never_calls_llm(monkeypatch):
     monkeypatch.setattr(planner, "gemini_plan", boom)
     plan = await planner.make_plan("Papa has chest pain, send ambulance")
     assert plan.kind == "sos" and plan.steps[0].tool == "dispatch_ambulance"
+
+
+# ---------- in-app "new version available" announcement ----------
+async def test_app_latest_is_public_and_driven_by_settings(client, monkeypatch):
+    from app.config import settings
+
+    r = await client.get("/v1/app/latest")  # no token: the update check runs before login
+    assert r.status_code == 200 and r.json()["version_code"] == 1 and r.json()["apk_url"] == ""
+
+    monkeypatch.setattr(settings, "app_latest_version_code", 3)
+    monkeypatch.setattr(settings, "app_latest_version_name", "1.2.0")
+    monkeypatch.setattr(settings, "app_apk_url", "https://example.com/Aangan-1.2.0.apk")
+    monkeypatch.setattr(settings, "app_min_version_code", 2)
+    j = (await client.get("/v1/app/latest")).json()
+    assert j == {"version_code": 3, "version_name": "1.2.0", "min_version_code": 2,
+                 "apk_url": "https://example.com/Aangan-1.2.0.apk", "notes": ""}

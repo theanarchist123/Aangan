@@ -43,14 +43,54 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 200,
           "backgroundColor": "#FFF8EE",
-          "dark": { "image": "./assets/splash-icon.png", "backgroundColor": "#12161C" }
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#12161C"
+          }
         }
       ],
-      ["expo-audio", { "microphonePermission": "Aangan uses the microphone so you can speak your requests in Hindi, Marathi, Tamil and more." }],
-      ["expo-image-picker", { "cameraPermission": "Aangan uses the camera to scan prescriptions, bills and policies into the family vault.", "photosPermission": "Aangan lets you choose a photo of a document to add to the family vault." }],
-      ["expo-local-authentication", { "faceIDPermission": "Aangan uses Face ID to confirm approvals and open the family vault." }],
-      ["expo-build-properties", { "android": { "usesCleartextTraffic": true, "buildArchs": ["arm64-v8a"] } }],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Aangan uses the microphone so you can speak your requests in Hindi, Marathi, Tamil and more."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Aangan uses the camera to scan prescriptions, bills and policies into the family vault.",
+          "photosPermission": "Aangan lets you choose a photo of a document to add to the family vault."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Aangan uses Face ID to confirm approvals and open the family vault."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "buildArchs": [
+              "arm64-v8a"
+            ]
+          }
+        }
+      ],
       "./plugins/withReleaseSigning.js"
-    ]
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/REPLACE_WITH_EAS_PROJECT_ID",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      },
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    }
   }
 }

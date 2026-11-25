@@ -533,6 +533,13 @@ async def dev_whatsapp(body: WhatsAppIn, session: AsyncSession = DB):
     return await process_inbound(session, body.from_phone, body.text)
 
 
+@router.get("/app/latest", summary="Newest installable app version (for the in-app update prompt)")
+async def app_latest():
+    return {"version_code": settings.app_latest_version_code, "version_name": settings.app_latest_version_name,
+            "min_version_code": settings.app_min_version_code, "apk_url": settings.app_apk_url,
+            "notes": settings.app_release_notes}
+
+
 @router.get("/health")
 async def health():
     return {"ok": True, "llm": settings.llm_provider}
