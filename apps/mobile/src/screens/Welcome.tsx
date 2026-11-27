@@ -52,26 +52,27 @@ function StoryStep({ i, icon, title, body }: { i: number; icon: keyof typeof Ion
   );
 }
 
-function SliderDemo() {
-  const x = useRef(new Animated.Value(0)).current;
+function ApprovalDemo() {
+  const press = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const l = Animated.loop(Animated.sequence([
-      Animated.delay(600), Animated.timing(x, { toValue: 1, duration: 1400, easing: Easing.inOut(Easing.cubic), useNativeDriver: true }),
-      Animated.delay(700), Animated.timing(x, { toValue: 0, duration: 300, useNativeDriver: true }),
+      Animated.delay(900), Animated.timing(press, { toValue: 1, duration: 320, easing: Easing.out(Easing.back(2)), useNativeDriver: true }),
+      Animated.delay(1500), Animated.timing(press, { toValue: 0, duration: 220, useNativeDriver: true }),
     ]));
     l.start(); return () => l.stop();
-  }, [x]);
+  }, [press]);
   return (
-    <View style={{ backgroundColor: "rgba(255,255,255,0.95)", borderRadius: 24, padding: 16, width: "100%", gap: 6 }}>
-      <Text style={{ fontFamily: f.xbold, fontSize: 11, letterSpacing: 0.8, color: "#5E6C70" }}>NEEDS YOUR APPROVAL</Text>
-      <Text style={{ fontFamily: f.serif, fontSize: 18, color: INK }}>Pay hospital admission deposit</Text>
-      <Text style={{ fontFamily: f.xbold, fontSize: 30, color: "#0E5E6F" }}>₹15,000</Text>
-      <View style={{ height: 52, borderRadius: 26, backgroundColor: "#D9ECEF", justifyContent: "center", marginTop: 6 }}>
-        <Text style={{ textAlign: "center", fontFamily: f.bold, color: "#0E5E6F" }}>Slide to approve  →</Text>
-        <Animated.View style={{ position: "absolute", left: 4, width: 44, height: 44, borderRadius: 22, backgroundColor: "#F4A300", alignItems: "center", justifyContent: "center", transform: [{ translateX: x.interpolate({ inputRange: [0, 1], outputRange: [0, 215] }) }] }}>
-          <Text style={{ fontSize: 22 }}>🦜</Text>
-        </Animated.View>
-      </View>
+    <View style={{ backgroundColor: "rgba(255,255,255,0.96)", borderRadius: 24, padding: 18, width: "100%", gap: 6 }}>
+      <Text style={{ fontFamily: f.xbold, fontSize: 11, letterSpacing: 0.8, color: "#A4531B" }}>NEEDS YOUR OK</Text>
+      <Text style={{ fontFamily: f.serif, fontSize: 19, color: INK }}>Pay hospital admission deposit</Text>
+      <Text style={{ fontFamily: f.display, fontSize: 36, color: INK }}>₹15,000</Text>
+      <Animated.View style={{ height: 52, borderRadius: 26, backgroundColor: "#231B14", flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center", marginTop: 6, transform: [{ scale: press.interpolate({ inputRange: [0, 1], outputRange: [1, 0.95] }) }] }}>
+        <Ionicons name="finger-print" size={22} color="#FFF6E6" />
+        <Text style={{ fontFamily: f.xbold, color: "#FFF6E6" }}>Approve with fingerprint</Text>
+      </Animated.View>
+      <Animated.View style={{ position: "absolute", right: 16, top: 24, borderWidth: 3, borderColor: "#1E7A4F", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3, opacity: press, transform: [{ scale: press.interpolate({ inputRange: [0, 1], outputRange: [2.2, 1] }) }, { rotate: "-10deg" }] }}>
+        <Text style={{ fontFamily: f.xbold, fontSize: 17, letterSpacing: 1.5, color: "#1E7A4F" }}>APPROVED</Text>
+      </Animated.View>
     </View>
   );
 }
@@ -119,7 +120,7 @@ export function Welcome({ onStart, onHaveAccount }: { onStart: () => void; onHav
     { key: "control", colors: ["#CFE9EE", "#FFF8EE"], render: () => (
       <View style={{ alignItems: "center", gap: 18, width: "100%" }}>
         <Text style={{ fontFamily: f.serif, fontSize: 30, color: INK, textAlign: "center", lineHeight: 38 }}>Nothing big happens without you.</Text>
-        <SliderDemo />
+        <ApprovalDemo />
         <Text style={{ fontFamily: f.reg, fontSize: 16, color: "#5E6C70", textAlign: "center" }}>You set the limit. Money, medical consent and sharing always ask first, confirmed with your fingerprint.</Text>
       </View>) },
     { key: "all", colors: ["#FFEEC7", "#D9ECEF"], render: () => (

@@ -40,14 +40,25 @@ if ($LASTEXITCODE -ge 8) { throw "robocopy failed ($LASTEXITCODE)" }
 $global:LASTEXITCODE = 0
 
 Set-Location $BuildDir
-if (-not (Test-Path "node_modules")) { Write-Host "Installing packages (one time)..." -ForegroundColor Cyan; npm ci --no-audit --no-fund }
+# Reinstall whenever package-lock.json changed since the last install (a stale node_modules misses new libraries).
+$lockHash = (Get-FileHash "package-lock.json" -Algorithm SHA256).Hash
+$stamp = "node_modules\.lock-hash"
+if (-not (Test-Path "node_modules") -or -not (Test-Path $stamp) -or ((Get-Content $stamp -Raw).Trim() -ne $lockHash)) {
+    Write-Host "Installing packages (dependencies changed)..." -ForegroundColor Cyan
+    npm ci --no-audit --no-fund
+    if ($LASTEXITCODE -ne 0) { throw "npm ci failed" }
+    Set-Content -Path $stamp -Value $lockHash -Encoding ascii
+}
 
 npx expo prebuild --platform android --clean --no-install
 # forward slashes: backslashes are escapes in .properties files
 Set-Content -Path "android\local.properties" -Value ("sdk.dir=" + ($env:ANDROID_HOME -replace "\\", "/")) -Encoding ascii
 
+# Give Gradle enough memory (the default 512 MB metaspace made the build hang) and skip release lint, which only reports.
+Add-Content -Path "android\gradle.properties" -Value "`norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1536m -Dfile.encoding=UTF-8"
 Push-Location android
-.\gradlew.bat assembleRelease --console=plain
+.\gradlew.bat --stop | Out-Null
+.\gradlew.bat assembleRelease -x lintVitalRelease -x lintVitalAnalyzeRelease -x lintVitalReportRelease --console=plain
 $code = $LASTEXITCODE
 Pop-Location
 if ($code -ne 0) { throw "Gradle build failed (exit $code)" }

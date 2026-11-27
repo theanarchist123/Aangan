@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
-import { Fraunces_700Bold } from "@expo-google-fonts/fraunces";
-import { PlusJakartaSans_400Regular, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold } from "@expo-google-fonts/plus-jakarta-sans";
-import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
+import { Fraunces_500Medium, Fraunces_500Medium_Italic, Fraunces_700Bold } from "@expo-google-fonts/fraunces";
+import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from "@expo-google-fonts/dm-sans";
+import { InstrumentSerif_400Regular, InstrumentSerif_400Regular_Italic } from "@expo-google-fonts/instrument-serif";
+import { Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold } from "@expo-google-fonts/manrope";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ApiError, call, type MyFamily, type Person, type Session } from "./src/api";
 import { forgetFamily, getServer, getUser, hasSeenWelcome, logout, markWelcomeSeen, onAuthChange, restore, savedFamily, saveFamily } from "./src/auth";
 import { Mitthu } from "./src/components/Mitthu";
@@ -23,37 +24,9 @@ import { Vault } from "./src/screens/Vault";
 import { Welcome } from "./src/screens/Welcome";
 import { ThemeProvider, useTheme } from "./src/ThemeContext";
 import { c, f } from "./src/theme";
-import { AppCtx, Btn, Txt } from "./src/ui";
+import { Pager, TabBar } from "./src/components/Tabs";
+import { AppCtx, Btn, Txt, type Tab } from "./src/ui";
 import { useFamily } from "./src/useFamily";
-
-type Tab = "home" | "tasks" | "vault" | "family" | "safety";
-const TABS: { id: Tab; label: string; on: keyof typeof Ionicons.glyphMap; off: keyof typeof Ionicons.glyphMap }[] = [
-  { id: "home", label: "Home", on: "home", off: "home-outline" },
-  { id: "tasks", label: "Tasks", on: "list-circle", off: "list-circle-outline" },
-  { id: "vault", label: "Vault", on: "lock-closed", off: "lock-closed-outline" },
-  { id: "family", label: "Family", on: "people", off: "people-outline" },
-  { id: "safety", label: "Safety", on: "shield-checkmark", off: "shield-checkmark-outline" },
-];
-
-function TabBar({ tab, setTab, pending }: { tab: Tab; setTab: (t: Tab) => void; pending: number }) {
-  const insets = useSafeAreaInsets();
-  return (
-    <View accessibilityRole="tablist" style={{ flexDirection: "row", backgroundColor: c.card, borderTopWidth: 1, borderTopColor: c.line, paddingBottom: Math.max(insets.bottom, 6), paddingTop: 6 }}>
-      {TABS.map((t) => {
-        const sel = tab === t.id;
-        return (
-          <Pressable key={t.id} accessibilityRole="tab" accessibilityState={{ selected: sel }} accessibilityLabel={t.label} onPress={() => setTab(t.id)} style={{ flex: 1, alignItems: "center", paddingVertical: 6, gap: 2 }}>
-            <View>
-              <Ionicons name={sel ? t.on : t.off} size={25} color={sel ? c.teal : c.muted} />
-              {t.id === "home" && pending > 0 && <View style={{ position: "absolute", right: -9, top: -5, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: c.marigold, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 }}><Text style={{ fontFamily: f.xbold, fontSize: 11, color: "#2a1c00" }}>{pending}</Text></View>}
-            </View>
-            <Text style={{ fontFamily: sel ? f.bold : f.semi, fontSize: 11, color: sel ? c.teal : c.muted }}>{t.label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
 
 function Main({ sess, onSignOut }: { sess: Session; onSignOut: () => void }) {
   const { data, loading, error, gone, refresh } = useFamily(sess);
@@ -66,6 +39,7 @@ function Main({ sess, onSignOut }: { sess: Session; onSignOut: () => void }) {
   const ctx = useMemo(() => ({
     openSos: (personId?: string, fail = false) => setSos({ person: data.people.find((p) => p.id === personId), fail }),
     senior: () => setSenior(true),
+    go: (t: Tab) => setTab(t),
   }), [data.people]);
 
   const pending = data.approvals.filter((a) => a.status === "pending").length;
@@ -87,14 +61,14 @@ function Main({ sess, onSignOut }: { sess: Session; onSignOut: () => void }) {
           <Senior sess={sess} data={data} onExit={() => setSenior(false)} />
         ) : (
           <>
-            <View style={{ flex: 1 }}>
-              {tab === "home" && <Home sess={sess} data={data} refresh={refresh} />}
-              {tab === "tasks" && <Tasks sess={sess} data={data} refresh={refresh} />}
-              {tab === "vault" && <Vault sess={sess} data={data} refresh={refresh} />}
-              {tab === "family" && <Family sess={sess} data={data} refresh={refresh} />}
-              {tab === "safety" && <Safety sess={sess} data={data} refresh={refresh} onSignOut={onSignOut} />}
-            </View>
-            <TabBar tab={tab} setTab={setTab} pending={pending} />
+            <Pager tab={tab} render={(t, active) => {
+              if (t === "home") return <Home sess={sess} data={data} refresh={refresh} />;
+              if (t === "tasks") return <Tasks sess={sess} data={data} refresh={refresh} />;
+              if (t === "vault") return <Vault sess={sess} data={data} refresh={refresh} active={active} />;
+              if (t === "family") return <Family sess={sess} data={data} refresh={refresh} />;
+              return <Safety sess={sess} data={data} refresh={refresh} onSignOut={onSignOut} />;
+            }} />
+            <TabBar tab={tab} setTab={setTab} onSos={() => ctx.openSos(data.people.find((p) => p.role === "parent")?.id)} pending={pending} />
           </>
         )}
         {sos && <SosOverlay sess={sess} person={sos.person} simulateFailure={sos.fail} contacts={contacts} onClose={() => { setSos(null); void refresh(); }} />}
@@ -106,7 +80,10 @@ function Main({ sess, onSignOut }: { sess: Session; onSignOut: () => void }) {
 type Phase = "boot" | "welcome" | "auth" | "loading" | "setup" | "main" | "error";
 
 function Root() {
-  const [fontsLoaded] = useFonts({ Fraunces_700Bold, PlusJakartaSans_400Regular, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold, PlusJakartaSans_800ExtraBold });
+  const [fontsLoaded] = useFonts({
+    Fraunces_500Medium, Fraunces_500Medium_Italic, Fraunces_700Bold, DMSans_400Regular, DMSans_500Medium, DMSans_700Bold,
+    InstrumentSerif_400Regular, InstrumentSerif_400Regular_Italic, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold,
+  });
   const { scheme } = useTheme();
   const [phase, setPhase] = useState<Phase>("boot");
   const [authMode, setAuthMode] = useState<"in" | "up">("in");

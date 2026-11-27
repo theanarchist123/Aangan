@@ -4,13 +4,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getServer, login, setServer, signup } from "../auth";
 import { Mitthu } from "../components/Mitthu";
-import { useTheme } from "../ThemeContext";
 import { c, f } from "../theme";
-import { Btn, Card, ErrorText, inputStyle, Txt } from "../ui";
+import { Btn, Card, ErrorText, inputStyle, ThemeToggle, Txt } from "../ui";
 
 export function AuthScreen({ initialMode = "in", onDone, onBack, notice }: { initialMode?: "in" | "up"; onDone: () => void; onBack?: () => void; notice?: string | null }) {
   const insets = useSafeAreaInsets();
-  const { scheme, pref, setPref } = useTheme();
   const [mode, setMode] = useState<"in" | "up">(initialMode);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -45,9 +43,7 @@ export function AuthScreen({ initialMode = "in", onDone, onBack, notice }: { ini
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, padding: 22, paddingTop: insets.top + 14, paddingBottom: insets.bottom + 24, justifyContent: "center", gap: 16 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           {onBack ? <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack} style={{ padding: 8 }}><Ionicons name="chevron-back" size={26} color={c.ink} /></Pressable> : <View />}
-          <Pressable accessibilityRole="button" accessibilityLabel={`Theme: ${pref}. Tap to change.`} onPress={() => setPref(pref === "system" ? "light" : pref === "light" ? "dark" : "system")} style={{ padding: 10, borderRadius: 22, backgroundColor: c.card, borderWidth: 1, borderColor: c.line }}>
-            <Ionicons name={pref === "system" ? "phone-portrait-outline" : scheme === "dark" ? "moon" : "sunny"} size={20} color={c.ink} />
-          </Pressable>
+          <ThemeToggle />
         </View>
         <View style={{ alignItems: "center" }}>
           <Mitthu size={96} mood={busy ? "thinking" : "idle"} />

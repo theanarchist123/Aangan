@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f1e8">
+  <title>Aangan — Home dashboard concept</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f6f1e8;
+      --surface: #fffdf8;
+      --surface-soft: #f0e9dd;
+      --ink: #292333;
+      --muted: #827c85;
+      --line: #e9e1d5;
+      --plum: #34283d;
+      --plum-light: #49364f;
+      --saffron: #f4ad43;
+      --coral: #e8785e;
+      --sage: #dce8dc;
+      --green: #477a58;
+      --shadow: 0 18px 48px rgb(52 40 61 / 8%);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 14px/1.5 "Aptos", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; }
+    .shell { display: flex; min-height: 100vh; }
+    .sidebar {
+      display: flex;
+      position: sticky;
+      top: 0;
+      flex: 0 0 244px;
+      height: 100vh;
+      flex-direction: column;
+      padding: 28px 18px 20px;
+      background: var(--plum);
+      color: #f6f0e8;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px 38px; }
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: 13px;
+      background: var(--saffron);
+      color: var(--plum);
+      font: 24px/1 Georgia, serif;
+    }
+    .brand-name { font: 700 25px/1 Georgia, serif; letter-spacing: -.8px; }
+    .brand-caption { margin-top: 3px; color: #c9bbc8; font-size: 10px; letter-spacing: 1.15px; text-transform: uppercase; }
+    .nav-label { padding: 0 12px 10px; color: #a99baa; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+    .nav { display: grid; gap: 5px; }
+    .nav-item {
+      display: flex;
+      height: 46px;
+      align-items: center;
+      gap: 13px;
+      padding: 0 13px;
+      border-radius: 13px;
+      color: #d8ced8;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .nav-item.active { background: #f5eee7; color: var(--plum); }
+    .nav-icon { display: grid; width: 20px; place-items: center; font-size: 17px; }
+    .nav-count { margin-left: auto; border-radius: 99px; padding: 2px 7px; background: var(--coral); color: white; font-size: 10px; }
+    .sidebar-spacer { flex: 1; }
+    .family-switch {
+      margin: 16px 3px;
+      padding: 13px;
+      border: 1px solid rgb(255 255 255 / 13%);
+      border-radius: 14px;
+      background: rgb(255 255 255 / 5%);
+    }
+    .switch-label { color: #bcaebc; font-size: 10px; letter-spacing: .7px; text-transform: uppercase; }
+    .switch-name { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; font-weight: 650; }
+    .profile { display: flex; align-items: center; gap: 10px; padding: 15px 7px 3px; border-top: 1px solid rgb(255 255 255 / 12%); }
+    .avatar {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 50%;
+      background: #e6c6a9;
+      color: #633d42;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .profile-name { font-size: 12px; font-weight: 700; }
+    .profile-caption { color: #bcaebc; font-size: 10px; }
+    .main { width: min(100% - 244px, 1500px); margin: 0 auto; padding: 25px 48px 45px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; }
+    .crumb { color: var(--muted); font-size: 12px; }
+    .crumb b { color: var(--ink); font-weight: 700; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .location-chip, .icon-button {
+      display: flex;
+      height: 39px;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 650;
+    }
+    .icon-button { width: 39px; justify-content: center; padding: 0; font-size: 16px; }
+    .location-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    .welcome { margin-bottom: 23px; }
+    .eyebrow { color: #a36840; font-size: 10px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; }
+    h1 { margin: 5px 0 0; font: 700 clamp(30px, 3vw, 39px)/1.12 Georgia, "Times New Roman", serif; letter-spacing: -1.35px; }
+    .welcome p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .dashboard { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .85fr); gap: 17px; align-items: stretch; }
+    .hero {
+      position: relative;
+      min-height: 277px;
+      overflow: hidden;
+      padding: 28px 31px;
+      border-radius: 22px;
+      background:
+        radial-gradient(ellipse at 87% 14%, rgb(244 173 67 / 30%), transparent 26%),
+        linear-gradient(125deg, var(--plum), #47344d 78%, #684653);
+      color: #fff9f0;
+      box-shadow: var(--shadow);
+    }
+    .hero:after { position: absolute; right: -52px; bottom: -156px; width: 340px; height: 340px; border: 1px solid rgb(255 255 255 / 11%); border-radius: 50%; content: ""; box-shadow: 0 0 0 30px rgb(255 255 255 / 3%), 0 0 0 62px rgb(255 255 255 / 3%); }
+    .hero-kicker { display: inline-flex; align-items: center; gap: 7px; color: #ead7ba; font-size: 10px; font-weight: 750; letter-spacing: 1.15px; text-transform: uppercase; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #a5d19c; box-shadow: 0 0 0 4px rgb(165 209 156 / 16%); }
+    .hero h2 { position: relative; z-index: 1; max-width: 430px; margin: 17px 0 8px; font: 700 32px/1.15 Georgia, "Times New Roman", serif; letter-spacing: -.7px; }
+    .hero-copy { position: relative; z-index: 1; max-width: 390px; margin: 0; color: #d7cad5; font-size: 12px; line-height: 1.7; }
+    .hero-bottom { position: relative; z-index: 2; display: flex; align-items: center; gap: 13px; margin-top: 23px; }
+    .hero-button { display: inline-flex; height: 39px; align-items: center; gap: 9px; padding: 0 14px; border: 0; border-radius: 11px; background: var(--saffron); color: #322637; font-size: 11px; font-weight: 800; }
+    .hero-link { color: #f1e8df; font-size: 11px; font-weight: 650; }
+    .courtyard-art { position: absolute; z-index: 1; right: 27px; bottom: 0; width: 204px; height: 219px; }
+    .sun { position: absolute; top: 15px; right: 29px; width: 76px; height: 76px; border-radius: 50%; background: #f3bb70; box-shadow: 0 0 0 14px rgb(243 187 112 / 13%); }
+    .arch { position: absolute; right: 9px; bottom: 0; width: 152px; height: 168px; overflow: hidden; border: 1px solid rgb(255 255 255 / 18%); border-bottom: 0; border-radius: 80px 80px 0 0; background: linear-gradient(180deg, #a56f69, #d59a68); }
+    .arch:before { position: absolute; inset: 18px 20px 0; border: 1px solid rgb(255 255 255 / 26%); border-bottom: 0; border-radius: 60px 60px 0 0; content: ""; }
+    .arch:after { position: absolute; bottom: 0; left: 47px; width: 57px; height: 98px; border: 1px solid rgb(255 255 255 / 28%); border-bottom: 0; border-radius: 36px 36px 0 0; background: linear-gradient(180deg, #ecc888, #886070); content: ""; }
+    .plant { position: absolute; z-index: 2; right: 149px; bottom: 0; width: 39px; height: 104px; border-bottom: 8px solid #aa776e; }
+    .plant:before, .plant:after { position: absolute; bottom: 24px; left: 13px; width: 13px; height: 42px; border-radius: 90% 0 90% 0; background: #89a486; content: ""; transform: rotate(-32deg); }
+    .plant:after { bottom: 54px; left: 20px; transform: rotate(20deg) scale(.8); }
+    .bird { position: absolute; z-index: 3; right: 6px; top: 55px; color: #fff0cf; font-size: 19px; transform: rotate(-16deg); }
+    .today-card, .panel { border: 1px solid var(--line); border-radius: 21px; background: var(--surface); box-shadow: 0 9px 28px rgb(52 40 61 / 4%); }
+    .today-card { padding: 21px 21px 18px; }
+    .card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .section-label { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: 1.35px; text-transform: uppercase; }
+    .today-date { margin-top: 3px; font: 700 21px/1.2 Georgia, serif; letter-spacing: -.35px; }
+    .day-pill { border-radius: 99px; padding: 5px 9px; background: var(--sage); color: #3e6d4b; font-size: 9px; font-weight: 800; white-space: nowrap; }
+    .parent-row { display: flex; align-items: center; gap: 11px; margin-top: 17px; padding: 12px; border-radius: 14px; background: #f8f3eb; }
+    .parent-avatar { width: 39px; height: 39px; border: 2px solid white; background: linear-gradient(140deg, #f1c59c, #c5785b); color: #573840; }
+    .parent-name { font-size: 12px; font-weight: 800; }
+    .parent-meta { color: var(--muted); font-size: 10px; }
+    .status-check { display: grid; width: 25px; height: 25px; margin-left: auto; place-items: center; border-radius: 50%; background: #e2eee2; color: var(--green); font-size: 13px; }
+    .timeline { display: grid; gap: 0; margin-top: 13px; }
+    .event { display: grid; grid-template-columns: 19px 1fr auto; min-height: 43px; align-items: center; gap: 8px; border-bottom: 1px solid #f1ece4; }
+    .event:last-child { border-bottom: 0; }
+    .event-icon { color: #a36840; font-size: 13px; text-align: center; }
+    .event-name { font-size: 10px; font-weight: 700; }
+    .event-time { color: #9c959b; font-size: 9px; }
+    .lower { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .85fr); gap: 17px; margin-top: 17px; }
+    .panel { min-height: 208px; padding: 21px; }
+    .panel-title { margin: 3px 0 0; font: 700 20px/1.25 Georgia, serif; letter-spacing: -.3px; }
+    .prompt-box { display: flex; min-height: 52px; align-items: center; gap: 11px; margin-top: 16px; padding: 7px 8px 7px 14px; border: 1px solid var(--line); border-radius: 13px; background: #fffefa; }
+    .prompt-placeholder { flex: 1; color: #a19aa0; font-size: 11px; }
+    .mic { color: #8d7b87; font-size: 15px; }
+    .send { display: grid; width: 35px; height: 35px; place-items: center; border-radius: 10px; background: var(--plum); color: white; font-size: 14px; }
+    .suggestions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+    .suggestion { padding: 6px 9px; border: 1px solid #eee6d9; border-radius: 99px; background: #fbf7f0; color: #766b72; font-size: 9px; font-weight: 650; }
+    .approval { position: relative; overflow: hidden; }
+    .approval:before { position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--coral); content: ""; }
+    .approval-top { display: flex; align-items: center; justify-content: space-between; }
+    .needs-pill { padding: 5px 8px; border-radius: 99px; background: #fff0e8; color: #ba5b42; font-size: 9px; font-weight: 800; }
+    .approval-detail { display: flex; align-items: center; gap: 11px; margin-top: 16px; }
+    .approval-icon { display: grid; width: 41px; height: 41px; flex: 0 0 auto; place-items: center; border-radius: 13px; background: #f9e9dc; color: #b86a50; font-size: 17px; }
+    .approval-name { font-size: 12px; font-weight: 800; }
+    .approval-meta { color: var(--muted); font-size: 10px; }
+    .approval-price { margin-left: auto; font: 700 19px Georgia, serif; white-space: nowrap; }
+    .approval-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 13px; padding-top: 12px; border-top: 1px solid #f0e9df; }
+    .approval-reason { max-width: 190px; color: var(--muted); font-size: 9px; }
+    .review { border: 0; border-radius: 10px; padding: 9px 12px; background: var(--plum); color: white; font-size: 10px; font-weight: 750; }
+    .trust-row { display: flex; align-items: center; gap: 7px; margin: 16px 2px 0; color: #8a8388; font-size: 10px; }
+    .trust-icon { color: var(--green); font-size: 12px; }
+    @media (max-width: 1060px) {
+      .sidebar { flex-basis: 210px; }
+      .main { width: calc(100% - 210px); padding: 25px 25px 40px; }
+      .dashboard, .lower { grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); gap: 13px; }
+      .courtyard-art { right: 4px; opacity: .76; transform: scale(.85); transform-origin: bottom right; }
+      .hero h2, .hero-copy, .hero-bottom { max-width: 64%; }
+    }
+    @media (max-width: 760px) {
+      .shell { display: block; padding-bottom: 75px; }
+      .sidebar { position: fixed; z-index: 5; inset: auto 0 0; width: 100%; height: 66px; padding: 5px 7px; }
+      .brand, .nav-label, .sidebar-spacer, .family-switch, .profile { display: none; }
+      .nav { height: 100%; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+      .nav-item { height: 54px; flex-direction: column; justify-content: center; gap: 1px; padding: 3px; font-size: 9px; }
+      .nav-icon { font-size: 16px; }
+      .nav-count { position: absolute; top: 4px; margin-left: 22px; }
+      .main { width: 100%; padding: 18px 16px 28px; }
+      .topbar { margin-bottom: 25px; }
+      .location-chip { height: 34px; padding: 0 9px; font-size: 9px; }
+      .icon-button { width: 34px; height: 34px; }
+      .welcome { margin-bottom: 17px; }
+      h1 { font-size: 32px; }
+      .dashboard, .lower { grid-template-columns: 1fr; gap: 12px; }
+      .hero { min-height: 260px; padding: 23px 21px; }
+      .hero h2 { max-width: 76%; font-size: 29px; }
+      .hero-copy, .hero-bottom { max-width: 72%; }
+      .courtyard-art { right: -10px; transform: scale(.68); }
+      .today-card { padding: 18px; }
+      .panel { min-height: unset; padding: 18px; }
+      .trust-row { font-size: 9px; }
+    }
+    @media (max-width: 380px) {
+      .hero h2 { font-size: 25px; }
+      .hero-copy { font-size: 11px; }
+      .hero-bottom { gap: 8px; }
+      .hero-button { padding: 0 10px; font-size: 10px; }
+      .hero-link { font-size: 10px; }
+      .top-actions { gap: 5px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">⌂</div>
+        <div><div class="brand-name">aangan</div><div class="brand-caption">Care, close to home</div></div>
+      </div>
+      <div class="nav-label">Your courtyard</div>
+      <nav class="nav">
+        <div class="nav-item active"><span class="nav-icon">⌂</span>Home</div>
+        <div class="nav-item"><span class="nav-icon">◷</span>Care plan<span class="nav-count">1</span></div>
+        <div class="nav-item"><span class="nav-icon">♡</span>Family</div>
+        <div class="nav-item"><span class="nav-icon">▣</span>Documents</div>
+        <div class="nav-item"><span class="nav-icon">⛨</span>Safety</div>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="family-switch">
+        <div class="switch-label">Your family</div>
+        <div class="switch-name">The Sharma family <span aria-hidden="true">⌄</span></div>
+      </div>
+      <div class="profile">
+        <div class="avatar">AS</div>
+        <div><div class="profile-name">Anika Sharma</div><div class="profile-caption">Family coordinator</div></div>
+        <span style="margin-left:auto;color:#bcaebc" aria-hidden="true">···</span>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">The Sharma family <span aria-hidden="true">/</span> <b>Home</b></div>
+        <div class="top-actions">
+          <div class="location-chip"><span class="location-dot"></span> Pune · 9:41 AM</div>
+          <button class="icon-button" aria-label="Notifications">♧</button>
+          <div class="avatar">AS</div>
+        </div>
+      </header>
+      <div class="welcome">
+        <div class="eyebrow">Thursday, 27 November</div>
+        <h1>Good morning, Anika.</h1>
+        <p>Here’s the little update that makes a world of difference.</p>
+      </div>
+      <section class="dashboard" aria-label="Family overview">
+        <article class="hero">
+          <div class="hero-kicker"><span class="live-dot"></span> A quiet morning in Pune</div>
+          <h2>Maa’s day is in good hands.</h2>
+          <p class="hero-copy">Her medicines are on track, the house is all set, and you’re right here for the moments that matter.</p>
+          <div class="hero-bottom">
+            <button class="hero-button">See today’s moments <span aria-hidden="true">↗</span></button>
+            <span class="hero-link">Everything looks good</span>
+          </div>
+          <div class="courtyard-art" aria-hidden="true">
+            <div class="sun"></div><div class="bird">✦</div><div class="plant"></div><div class="arch"></div>
+          </div>
+        </article>
+        <article class="today-card">
+          <div class="card-heading">
+            <div><div class="section-label">A little from home</div><div class="today-date">Maa’s Thursday</div></div>
+            <span class="day-pill">ALL WELL</span>
+          </div>
+          <div class="parent-row">
+            <div class="avatar parent-avatar">MS</div>
+            <div><div class="parent-name">Meera Sharma</div><div class="parent-meta">Pune, Maharashtra · Just checked in</div></div>
+            <div class="status-check" aria-label="Doing well">✓</div>
+          </div>
+          <div class="timeline">
+            <div class="event"><span class="event-icon">☀</span><span class="event-name">Morning check-in with Maa</span><span class="event-time">8:14 am</span></div>
+            <div class="event"><span class="event-icon">✿</span><span class="event-name">Blood pressure medicine taken</span><span class="event-time">8:22 am</span></div>
+            <div class="event"><span class="event-icon">⌂</span><span class="event-name">Fresh groceries delivered</span><span class="event-time">Yesterday</span></div>
+          </div>
+        </article>
+      </section>
+      <section class="lower" aria-label="Care actions">
+        <article class="panel">
+          <div class="section-label">Your family, one message away</div>
+          <h2 class="panel-title">What can we take off your mind?</h2>
+          <div class="prompt-box">
+            <span class="prompt-placeholder">Ask Mitthu to arrange something for Maa…</span>
+            <span class="mic" aria-hidden="true">♩</span>
+            <span class="send" aria-hidden="true">↗</span>
+          </div>
+          <div class="suggestions">
+            <span class="suggestion">Book a doctor visit</span>
+            <span class="suggestion">Arrange a refill</span>
+            <span class="suggestion">Check in with Maa</span>
+          </div>
+          <div class="trust-row"><span class="trust-icon">✓</span> Nothing important happens without your say-so.</div>
+        </article>
+        <article class="panel approval">
+          <div class="approval-top">
+            <div><div class="section-label">A decision for you</div><h2 class="panel-title">One quick approval</h2></div>
+            <span class="needs-pill">YOUR OK NEEDED</span>
+          </div>
+          <div class="approval-detail">
+            <div class="approval-icon" aria-hidden="true">✚</div>
+            <div><div class="approval-name">Maa’s blood test</div><div class="approval-meta">Home collection · Today, 11:30 am</div></div>
+            <div class="approval-price">₹850</div>
+          </div>
+          <div class="approval-footer">
+            <div class="approval-reason">You’re in control. Review details before anything is booked.</div>
+            <button class="review">Review request <span aria-hidden="true">→</span></button>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

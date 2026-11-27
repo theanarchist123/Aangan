@@ -4,15 +4,25 @@ import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { call, type Person, type Session } from "../api";
+import Svg, { Circle, Ellipse } from "react-native-svg";
 import { Mitthu } from "../components/Mitthu";
 import { f } from "../theme";
 import type { FamilyData } from "../useFamily";
-import { useApp } from "../ui";
+import { Rise, useApp } from "../ui";
 import { useTheme } from "../ThemeContext";
 
 // Senior Mode uses its own high-contrast palette (>= 7:1) and 64pt+ targets.
 const KL = { bg: "#FFFDF8", ink: "#111111", teal: "#0B4F5E", sos: "#B00020", gold: "#FFE6A6", green: "#1E6B2B", card: "#FFFFFF", garland: "#FFF1CC", ok: "#DFF3E1", gold_ink: "#111111" };
 const KD = { bg: "#000000", ink: "#FFFFFF", teal: "#1F7F94", sos: "#C4162F", gold: "#4A3A10", green: "#2F8F3F", card: "#14181C", garland: "#2B2410", ok: "#123A1C", gold_ink: "#FFFFFF" };
+
+function Marigold() {
+  return (
+    <Svg width={44} height={44} viewBox="0 0 44 44">
+      {Array.from({ length: 10 }, (_, i) => <Ellipse key={i} cx={22} cy={10} rx={6} ry={10} fill={i % 2 ? "#FF8A3D" : "#F5A524"} rotation={i * 36} origin="22, 22" />)}
+      <Circle cx={22} cy={22} r={7} fill="#B45309" />
+    </Svg>
+  );
+}
 
 /** Senior Mode: huge buttons, strong contrast, photos of the kids, and a garland that grows through the day. */
 export function Senior({ sess, data, onExit }: { sess: Session; data: FamilyData; onExit: () => void }) {
@@ -55,8 +65,8 @@ export function Senior({ sess, data, onExit }: { sess: Session; data: FamilyData
       {parents.length > 1 && (
         <View style={{ flexDirection: "row", gap: 10 }}>
           {parents.map((p) => (
-            <Pressable key={p.id} onPress={() => { setMeId(p.id); setTaken([]); setFine(false); setMsg(null); }} style={{ flex: 1, minHeight: 56, borderRadius: 18, alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: K.ink, backgroundColor: me?.id === p.id ? K.ink : "#fff" }}>
-              <Text style={{ fontFamily: f.xbold, fontSize: 18, color: me?.id === p.id ? "#fff" : K.ink }}>{p.name.split(" ")[0]}</Text>
+            <Pressable key={p.id} onPress={() => { setMeId(p.id); setTaken([]); setFine(false); setMsg(null); }} style={{ flex: 1, minHeight: 56, borderRadius: 18, alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: K.ink, backgroundColor: me?.id === p.id ? K.ink : K.card }}>
+              <Text style={{ fontFamily: f.xbold, fontSize: 18, color: me?.id === p.id ? K.bg : K.ink }}>{p.name.split(" ")[0]}</Text>
             </Pressable>
           ))}
         </View>
@@ -103,7 +113,9 @@ export function Senior({ sess, data, onExit }: { sess: Session; data: FamilyData
 
       <View style={{ backgroundColor: K.garland, borderRadius: 26, padding: 18, alignItems: "center" }} accessibilityLabel={`Garland with ${flowers} flowers`}>
         <Text style={{ fontFamily: f.xbold, fontSize: 22, color: K.ink }}>Today&apos;s garland</Text>
-        <Text style={{ fontSize: 40, marginTop: 6 }}>{flowers ? "🌼".repeat(flowers) : "🌱"}</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8, marginTop: 10, minHeight: 44 }}>
+          {flowers ? Array.from({ length: flowers }, (_, i) => <Rise key={i} from={20}><Marigold /></Rise>) : <Text style={{ fontFamily: f.semi, fontSize: 18, color: K.ink }}>Your first flower is waiting.</Text>}
+        </View>
       </View>
       {msg && <Text accessibilityRole="alert" style={{ fontFamily: f.xbold, fontSize: 22, color: K.ink, backgroundColor: K.ok, padding: 18, borderRadius: 22 }}>{msg}</Text>}
     </ScrollView>

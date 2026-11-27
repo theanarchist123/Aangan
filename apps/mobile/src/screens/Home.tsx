@@ -1,24 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { Platform, Pressable, Text, TextInput, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder } from "expo-audio";
-import { Ionicons } from "@expo/vector-icons";
 import { call, uploadFile, type Finding, type Session, type Weather } from "../api";
-import { useTheme } from "../ThemeContext";
+import { getUser } from "../auth";
 import { ApprovalCard } from "../components/ApprovalCard";
-import { Mitthu, type Mood } from "../components/Mitthu";
-import { Rings } from "../components/Rings";
-import { hourIn, SkyClock } from "../components/SkyClock";
+import { callName, Composer, Drill, FamilyRings, Guardian, ParentTiles, shortName, TodayAtHome } from "../components/HomeBlocks";
+import type { Mood } from "../components/Mitthu";
+import { dayIn, hourIn, SkyClock, timeIn, useNow } from "../components/SkyClock";
 import { Stories } from "../components/Stories";
 import { TaskTimeline } from "../components/TaskTimeline";
-import { c, f } from "../theme";
-import { Btn, Card, Empty, ErrorText, Txt, useApp } from "../ui";
+import { c, f, isDark } from "../theme";
+import { Btn, IconBtn, Rise, Tap, ThemeToggle, Txt, useApp } from "../ui";
 import type { FamilyData } from "../useFamily";
 import { Screen } from "./Screen";
 
-const CHIPS = ["Book a blood test for Maa", "Pay the electricity bill", "Send a plumber to the flat", "Pay electricity bill Rs 9,000"];
-
 export function Home({ sess, data, refresh }: { sess: Session; data: FamilyData; refresh: () => Promise<void> }) {
-  const { openSos, senior } = useApp();
+  const { openSos, senior, go } = useApp();
   const sponsor = data.people.find((p) => p.role === "sponsor");
   const parents = data.people.filter((p) => p.role === "parent");
   const pending = data.approvals.filter((a) => a.status === "pending");
@@ -27,14 +24,14 @@ export function Home({ sess, data, refresh }: { sess: Session; data: FamilyData;
   const [err, setErr] = useState<string | null>(null);
   const [stories, setStories] = useState(false);
   const [findings, setFindings] = useState<Finding[] | null>(null);
-  const [sosWho, setSosWho] = useState<string | undefined>(undefined);
-  const [sosFail, setSosFail] = useState(false);
+  const [looking, setLooking] = useState(false);
   const [weather, setWeather] = useState<Weather | null>(null);
   const [recording, setRecording] = useState(false);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const stopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { pref, setPref, scheme } = useTheme();
   const firstParent = parents[0]?.id;
+  const now = useNow();
+  const dk = isDark();
 
   useEffect(() => {
     if (!firstParent) return;
@@ -50,7 +47,7 @@ export function Home({ sess, data, refresh }: { sess: Session; data: FamilyData;
         await recorder.stop();
         setRecording(false);
         const uri = recorder.uri;
-        if (!uri) return;
+        if (!uri) { setMood("idle"); return; }
         setMood("thinking");
         const r = await uploadFile<{ transcript: string }>(`/families/${sess.familyId}/voice/transcribe-b64`, { uri, name: "voice.m4a", type: Platform.OS === "ios" ? "audio/m4a" : "audio/mp4" });
         setGoal(r.transcript);
@@ -76,119 +73,107 @@ export function Home({ sess, data, refresh }: { sess: Session; data: FamilyData;
     try {
       await call(sess, `/families/${sess.familyId}/tasks`, "POST", { goal: text });
       setGoal(""); await refresh();
-      setMood("celebrate"); setTimeout(() => setMood("idle"), 2200);
+      setMood("celebrate"); setTimeout(() => setMood("idle"), 2600);
     } catch (e) { setMood("idle"); setErr(e instanceof Error ? e.message : "Mitthu couldn't do that"); }
   }
   async function guardian() {
+    setLooking(true); setErr(null);
     try { setFindings((await call<{ findings: Finding[] }>(sess, `/families/${sess.familyId}/guardian/run`, "POST")).findings); await refresh(); }
     catch (e) { setErr(e instanceof Error ? e.message : "Guardian check failed"); }
+    finally { setLooking(false); }
   }
 
-  const hour = hourIn(sponsor?.timezone, new Date());
-  const hello = hour < 5 || hour >= 22 ? "Hello" : hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const summary = pending.length ? `${pending.length} thing${pending.length > 1 ? "s" : ""} need your OK`
-    : data.tasks.some((t) => t.status === "escalated") ? "A task was escalated, see Tasks" : "All quiet in the courtyard";
+  const me = getUser()?.name || sponsor?.name || getUser()?.email || "You";
+  const initials = me.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+  const homeTz = parents[0]?.timezone || "Asia/Kolkata";
+  const homeCity = parents[0]?.city || "India";
+  const escalated = data.tasks.some((t) => t.status === "escalated");
+  const shown = data.stories.map((s) => ({ ...s, title: data.people.reduce((t, p) => t.split(p.name).join(callName(p.name)), s.title) }));
+  const names = parents.length ? parents.slice(0, 2).map((p) => callName(p.name)).join(" & ") : "";
+  const [line1, line2] = escalated ? ["Something at home", "needs you now."]
+    : pending.length ? [`${pending.length === 1 ? "One thing is" : `${pending.length} things are`}`, "waiting for you."]
+      : !parents.length ? ["Your courtyard", "is ready."]
+        : [`${names} ${parents.length > 1 ? "are" : "is"}`, "having a calm day."];
+  const hour = hourIn(homeTz, now);
+  const greet = hour < 5 || hour >= 21 ? "Good night" : hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  const profile = (
+    <Tap accessibilityLabel="Safety, trust and settings" onPress={() => go("safety")}
+      style={{ width: 44, height: 44, borderRadius: dk ? 15 : 22, backgroundColor: dk ? c.raised : c.ink, alignItems: "center", justifyContent: "center" }}>
+      <Text style={{ fontFamily: f.xbold, fontSize: 14, color: dk ? c.teal : c.onTeal }}>{initials}</Text>
+    </Tap>
+  );
+  const tools = (
+    <View style={{ flexDirection: "row", gap: 8 }}>
+      <IconBtn icon="accessibility-outline" label="Open Senior Mode" onPress={senior} />
+      <ThemeToggle />
+    </View>
+  );
 
   return (
     <Screen onRefresh={refresh}>
-      {sponsor && parents[0] && (
-        <SkyClock themWeather={weather ? `${weather.temp_c}°C · ${weather.summary}` : undefined} you={sponsor.timezone} them={parents[0].timezone} youLabel={`You · ${sponsor.city || "Home"}`} themLabel={`${parents[0].name.split(" ")[0]} · ${parents[0].city || "India"}`} />
+      {dk ? (
+        <View key="dusk" style={{ gap: 16 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            {profile}
+            <View style={{ flex: 1 }}>
+              <Text numberOfLines={1} style={{ fontFamily: f.semi, fontSize: 11, letterSpacing: 0.6, color: c.muted, textTransform: "uppercase" }}>{dayIn(sponsor?.timezone, now, { weekday: "long" })}{sponsor?.city ? ` · ${sponsor.city}` : ""}</Text>
+              <Text numberOfLines={1} style={{ fontFamily: f.bold, fontSize: 14, color: c.ink }}>{shortName(me)}&apos;s courtyard</Text>
+            </View>
+            {tools}
+          </View>
+          <Rise delay={40}>
+            <Text accessibilityRole="header" style={{ fontFamily: f.display, fontSize: 39, lineHeight: 42, color: c.ink }}>{line1}{"\n"}<Text style={{ fontFamily: f.italic, color: escalated ? c.sos : c.teal }}>{line2}</Text></Text>
+          </Rise>
+          {parents[0] && (
+            <Rise delay={110}>
+              <SkyClock themWeather={weather ? `${weather.temp_c}° · ${weather.summary}` : undefined} you={sponsor?.timezone ?? homeTz} them={homeTz} youLabel={`You · ${sponsor?.city || "Here"}`} themLabel={`Home · ${homeCity}`} />
+            </Rise>
+          )}
+          {parents.length > 0 && <Rise delay={170}><ParentTiles parents={parents} stories={shown} onPress={() => data.stories.length && setStories(true)} /></Rise>}
+        </View>
+      ) : (
+        <View key="sunlit" style={{ gap: 18 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            {profile}
+            <View style={{ flex: 1 }} />
+            {tools}
+          </View>
+          <Rise delay={40}>
+            <Text style={{ fontFamily: f.bold, fontSize: 11.5, letterSpacing: 1.2, color: c.muted, textTransform: "uppercase", marginBottom: 8 }}>
+              {dayIn(homeTz, now, { weekday: "short", day: "numeric", month: "short" })} · {homeCity} {timeIn(homeTz, now)}{weather ? ` · ${weather.temp_c}°` : ""}
+            </Text>
+            <Text accessibilityRole="header" style={{ fontFamily: f.display, fontSize: 42, lineHeight: 45, letterSpacing: -0.8, color: c.ink }}>{greet}{"\n"}from <Text style={{ fontFamily: f.italic, color: c.teal }}>{homeCity}.</Text></Text>
+            <Text style={{ fontFamily: f.reg, fontSize: 15, color: c.muted, marginTop: 8 }}>{line1} {line2}</Text>
+          </Rise>
+          <FamilyRings people={data.people.filter((p) => p.role !== "sponsor")} stories={shown} onStories={() => data.stories.length && setStories(true)} onInvite={() => go("family")} />
+        </View>
       )}
 
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <Mitthu mood={mood} size={74} />
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: f.serif, fontSize: 25, color: c.ink }}>{hello}{sponsor ? `, ${sponsor.name.split(" ")[0]}` : ""}</Text>
-          <Txt variant="muted" style={{ fontSize: 15 }}>{summary}</Txt>
-        </View>
-        <View style={{ gap: 8 }}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Open Senior Mode" onPress={senior} style={{ padding: 10, borderRadius: 14, backgroundColor: c.tealSoft }}>
-            <Ionicons name="accessibility" size={22} color={c.teal} />
-          </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={`Theme: ${pref}. Tap to change.`} onPress={() => setPref(pref === "system" ? "light" : pref === "light" ? "dark" : "system")} style={{ padding: 10, borderRadius: 14, backgroundColor: c.tealSoft, alignItems: "center" }}>
-            <Ionicons name={pref === "system" ? "phone-portrait-outline" : scheme === "dark" ? "moon" : "sunny"} size={22} color={c.teal} />
-          </Pressable>
-        </View>
-      </View>
+      {!dk && <Rise delay={200}><TodayAtHome stories={shown} tasks={data.tasks} onTasks={() => go("tasks")} /></Rise>}
 
-      {pending.map((a) => <ApprovalCard key={a.id} a={a} sess={sess} onDone={refresh} />)}
+      {pending.map((a) => <Rise key={a.id} delay={240}><ApprovalCard a={a} sess={sess} onDone={refresh} /></Rise>)}
 
-      <Card>
-        <Txt variant="h2">Tell Mitthu what you need</Txt>
-        <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
-          <TextInput accessibilityLabel="What do you need done?" value={goal} onChangeText={setGoal} placeholder="e.g. Get Maa's sugar test done this week"
-            placeholderTextColor={c.placeholder} returnKeyType="send" onSubmitEditing={() => submit(goal)}
-            style={{ flex: 1, borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 12, fontFamily: f.reg, fontSize: 15, color: c.ink, backgroundColor: c.inputBg }} />
-          <Pressable accessibilityRole="button" accessibilityLabel={recording ? "Stop recording" : "Speak your request"} accessibilityState={{ selected: recording }} onPress={toggleMic}
-            style={{ width: 50, height: 50, borderRadius: 25, borderWidth: 1.5, borderColor: recording ? c.sos : c.line, backgroundColor: recording ? "rgba(214,40,40,0.12)" : "transparent", alignItems: "center", justifyContent: "center" }}>
-            <Ionicons name={recording ? "stop" : "mic"} size={22} color={recording ? c.sos : c.ink} />
-          </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Send" disabled={!goal.trim() || mood === "thinking"} onPress={() => submit(goal)}
-            style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: c.marigold, alignItems: "center", justifyContent: "center", opacity: !goal.trim() ? 0.45 : 1 }}>
-            <Ionicons name="send" size={20} color="#2a1c00" />
-          </Pressable>
+      <Rise delay={260}><Composer goal={goal} setGoal={setGoal} mood={mood} recording={recording} onMic={toggleMic} onSend={submit} error={err} /></Rise>
+
+      {data.stories.length > 0 && (
+        <Rise delay={300}>
+          <Btn label={`Watch ${parents[0] ? callName(parents[0].name) : "their"}'s day`} kind="ghost" onPress={() => setStories(true)} />
+        </Rise>
+      )}
+
+      <Rise delay={320}><Guardian findings={findings} onRun={guardian} running={looking} /></Rise>
+
+      {data.tasks[0] && (
+        <View style={{ gap: 10 }}>
+          <Txt variant="h2">Latest journey</Txt>
+          <TaskTimeline key={data.tasks[0].id} task={data.tasks[0]} sess={sess} startOpen={data.tasks[0].status !== "done"} />
         </View>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-          {CHIPS.map((t) => (
-            <Pressable key={t} accessibilityRole="button" onPress={() => submit(t)} disabled={mood === "thinking"} style={{ backgroundColor: c.tealSoft, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 }}>
-              <Text style={{ fontFamily: f.semi, color: c.teal, fontSize: 13 }}>{t}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <ErrorText>{err}</ErrorText>
-      </Card>
+      )}
 
-      {data.tasks[0] && (<View style={{ gap: 8 }}><Txt variant="h2">Latest</Txt><TaskTimeline task={data.tasks[0]} sess={sess} /></View>)}
+      <Drill parents={parents} onStart={(id, fail) => openSos(id, fail)} />
 
-      <View style={{ gap: 10 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Txt variant="h2">Your parents</Txt>
-          <Btn label="Today's stories" kind="ghost" small disabled={!data.stories.length} onPress={() => setStories(true)} icon={<Ionicons name="albums" size={16} color={c.ink} />} />
-        </View>
-        {parents.length === 0 && <Empty emoji="🏡" title="No parents added yet" hint="Add them in the Family tab and Mitthu starts looking after them." />}
-        {parents.map((p) => {
-          const med = data.stories.find((s) => s.person_id === p.id && s.kind === "medicines");
-          const chk = data.stories.find((s) => s.person_id === p.id && s.kind === "checkin");
-          return (
-            <Card key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
-              <Rings size={86} rings={[{ label: "Medicines", value: med?.value ?? 0, color: c.parrot }, { label: "Check-in", value: chk?.value ?? 0, color: c.marigold }]} />
-              <View style={{ flex: 1 }}>
-                <Txt variant="h2">{p.name}</Txt>
-                <Txt variant="muted">{p.city}{p.conditions.length ? ` · ${p.conditions.join(", ")}` : ""}</Txt>
-                <Txt style={{ marginTop: 4, fontSize: 14 }}>{med?.title}</Txt>
-                <Txt style={{ fontSize: 14 }}>{chk?.title}</Txt>
-              </View>
-            </Card>
-          );
-        })}
-      </View>
-
-      <Card>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}><Ionicons name="shield-checkmark" size={20} color={c.teal} /><Txt variant="h2">Guardian</Txt></View>
-          <Btn label="Run check" kind="teal" small onPress={guardian} />
-        </View>
-        {findings === null ? <Txt variant="muted" style={{ marginTop: 8 }}>Mitthu watches for missed check-ins, expiring policies and bills due.</Txt>
-          : findings.length === 0 ? <Text style={{ marginTop: 8, fontFamily: f.bold, color: c.parrot }}>Nothing needs attention right now.</Text>
-          : findings.map((x, i) => <Txt key={i} style={{ marginTop: 6 }}>{x.severity === "high" ? "🔴" : "🟡"} {x.message}</Txt>)}
-      </Card>
-
-      <Card>
-        <Txt variant="h2">Emergency drill</Txt>
-        <Txt variant="muted" style={{ marginTop: 2 }}>Try the SOS flow with mock hospital and ambulance connectors. No real calls are made.</Txt>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-          {parents.map((p) => {
-            const on = (sosWho ?? parents[0]?.id) === p.id;
-            return <Pressable key={p.id} onPress={() => setSosWho(p.id)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: on ? c.teal : c.tealSoft }}><Text style={{ fontFamily: f.semi, color: on ? "#fff" : c.teal, fontSize: 13 }}>{p.name.split(" (")[0]}</Text></Pressable>;
-          })}
-        </View>
-        <Pressable onPress={() => setSosFail(!sosFail)} accessibilityRole="checkbox" accessibilityState={{ checked: sosFail }} style={{ flexDirection: "row", alignItems: "center", gap: 8, marginVertical: 12 }}>
-          <Ionicons name={sosFail ? "checkbox" : "square-outline"} size={22} color={c.teal} /><Txt>Simulate ambulance failure</Txt>
-        </Pressable>
-        <Btn label="Start SOS drill" kind="sos" disabled={!parents.length} onPress={() => openSos(sosWho ?? parents[0]?.id, sosFail)} icon={<Ionicons name="alert-circle" size={20} color="#fff" />} />
-      </Card>
-
-      {stories && <Stories stories={data.stories} onClose={() => setStories(false)} />}
+      {stories && <Stories stories={shown} onClose={() => setStories(false)} />}
     </Screen>
   );
 }

@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { Linking, Pressable, Share, Switch, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { call, webBase, type Member, type Person, type Session } from "../api";
-import { c, f } from "../theme";
-import { Btn, Card, ErrorText, inputStyle, Pill, Txt } from "../ui";
+import { c, f, isDark } from "../theme";
+import { Constellation } from "../components/Constellation";
+import { callName } from "../components/HomeBlocks";
+import { Btn, Card, Chip, Empty, ErrorText, Heading, inputStyle, Pill, Rise, Segmented, Txt } from "../ui";
 import type { FamilyData } from "../useFamily";
 import { Screen } from "./Screen";
 
@@ -33,7 +35,7 @@ function PersonCard({ p, sess, refresh }: { p: Person; sess: Session; refresh: (
     <Card style={{ gap: 10 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <View style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: p.role === "parent" ? c.marigoldSoft : c.tealSoft, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ fontFamily: f.serif, fontSize: 20, color: c.ink }}>{p.name[0]}</Text>
+          <Text style={{ fontFamily: f.serif, fontSize: 20, color: c.ink }}>{callName(p.name)[0]}</Text>
         </View>
         <View style={{ flex: 1 }}>
           <Txt variant="h2">{p.name}</Txt>
@@ -98,7 +100,7 @@ function Members({ sess }: { sess: Session }) {
         <>
           <TextInput accessibilityLabel="Email to invite" placeholder="sibling@example.com" placeholderTextColor={c.placeholder} keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} style={input} />
           <View style={{ flexDirection: "row", gap: 8 }}>
-            {(["relative", "parent"] as const).map((r) => <Pressable key={r} onPress={() => setRole(r)} style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: role === r ? c.teal : c.tealSoft }}><Text style={{ fontFamily: f.semi, fontSize: 13, color: role === r ? "#fff" : c.teal }}>{r}</Text></Pressable>)}
+            {(["relative", "parent"] as const).map((r) => <Chip key={r} label={r} on={role === r} onPress={() => setRole(r)} />)}
           </View>
           <Btn label="Invite" kind="teal" disabled={!email.trim()} onPress={invite} />
         </>
@@ -109,61 +111,80 @@ function Members({ sess }: { sess: Session }) {
   );
 }
 
+type View3 = "circle" | "add" | "access";
+
 export function Family({ sess, data, refresh }: { sess: Session; data: FamilyData; refresh: () => Promise<void> }) {
   const [form, setForm] = useState({ name: "", role: "parent", city: "", phone: "", blood_group: "", language: "hi", is_emergency_contact: false });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [view, setView] = useState<View3>("circle");
+  const [picked, setPicked] = useState<string | undefined>();
+  const person = data.people.find((p) => p.id === picked) ?? data.people.find((p) => p.role === "parent") ?? data.people[0];
 
   async function add() {
     setBusy(true); setErr(null);
-    try { await call(sess, `/families/${sess.familyId}/people`, "POST", form); setForm({ ...form, name: "", city: "", phone: "", blood_group: "" }); await refresh(); }
+    try { await call(sess, `/families/${sess.familyId}/people`, "POST", form); setForm({ ...form, name: "", city: "", phone: "", blood_group: "" }); await refresh(); setView("circle"); }
     catch (e) { setErr(e instanceof Error ? e.message : "Could not add"); } finally { setBusy(false); }
   }
   async function revoke(grantee: string, scope: string) {
     try { await call(sess, `/families/${sess.familyId}/consents`, "POST", { grantee, scope, granted: false }); await refresh(); }
     catch (e) { setErr(e instanceof Error ? e.message : "Could not revoke"); }
   }
-  const input = { borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12, fontFamily: f.reg, fontSize: 15, color: c.ink, backgroundColor: c.inputBg } as const;
+  const input = inputStyle();
   const active = data.consents.filter((x) => x.granted);
 
   return (
     <Screen onRefresh={refresh}>
-      <Txt variant="title">Family circle</Txt>
-      {data.people.map((p) => <PersonCard key={p.id} p={p} sess={sess} refresh={refresh} />)}
+      <Rise><Heading kicker={`${data.people.length} ${data.people.length === 1 ? "person" : "people"} looking out for each other`} title="Your family" accent="circle." /></Rise>
+      <Rise delay={60}><Segmented value={view} onChange={setView} options={[{ id: "circle", label: "Circle" }, { id: "add", label: "Add someone" }, { id: "access", label: "Access" }]} /></Rise>
 
-      <Card style={{ gap: 10 }}>
-        <Txt variant="h2">Add someone</Txt>
-        <TextInput accessibilityLabel="Name" placeholder="Name" value={form.name} onChangeText={(v) => setForm({ ...form, name: v })} style={input} />
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-          {["parent", "relative", "neighbour", "secretary", "poa", "caregiver"].map((r) => (
-            <Pressable key={r} onPress={() => setForm({ ...form, role: r })} style={{ paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: form.role === r ? c.teal : c.tealSoft }}>
-              <Text style={{ fontFamily: f.semi, fontSize: 13, color: form.role === r ? "#fff" : c.teal }}>{ROLE[r]}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <TextInput accessibilityLabel="City" placeholder="City" value={form.city} onChangeText={(v) => setForm({ ...form, city: v })} style={input} />
-        <TextInput accessibilityLabel="Phone" placeholder="Phone (+91…)" keyboardType="phone-pad" value={form.phone} onChangeText={(v) => setForm({ ...form, phone: v })} style={input} />
-        <TextInput accessibilityLabel="Blood group" placeholder="Blood group" value={form.blood_group} onChangeText={(v) => setForm({ ...form, blood_group: v })} style={input} />
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <Txt style={{ flex: 1 }}>Alert this person first in an emergency</Txt>
-          <Switch value={form.is_emergency_contact} onValueChange={(v) => setForm({ ...form, is_emergency_contact: v })} trackColor={{ true: c.teal }} thumbColor="#fff" />
-        </View>
-        <Btn label={busy ? "Adding…" : "Add to circle"} kind="teal" disabled={busy || !form.name.trim()} onPress={add} />
-        <ErrorText>{err}</ErrorText>
-      </Card>
+      {view === "circle" && (
+        data.people.length === 0 ? <Empty title="Nobody here yet" hint="Add your parents to start the circle." /> : (
+          <View style={{ gap: 14 }}>
+            <Constellation people={data.people} selected={person?.id} onSelect={setPicked} />
+            <Txt variant="muted" style={{ textAlign: "center", fontSize: 12 }}>Tap someone to open their card. A red mark means they are alerted first in an emergency.</Txt>
+            {person && <Rise key={person.id} from={26}><PersonCard p={person} sess={sess} refresh={refresh} /></Rise>}
+          </View>
+        )
+      )}
 
-      <Members sess={sess} />
-
-      <View style={{ gap: 10 }}>
-        <Txt variant="h2">Who can see what</Txt>
-        {active.length === 0 && <Card><Txt variant="muted">No active permissions. Nobody but you can see sensitive data.</Txt></Card>}
-        {active.map((x) => (
-          <Card key={x.grantee + x.scope} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <Txt style={{ flex: 1 }}><Text style={{ fontFamily: f.bold }}>{x.grantee}</Text> can <Text style={{ fontFamily: f.semi }}>{x.scope}</Text>{x.expires_at ? ` until ${new Date(x.expires_at).toLocaleTimeString()}` : ""}</Txt>
-            <Btn small kind="ghost" label="Revoke" onPress={() => revoke(x.grantee, x.scope)} />
+      {view === "add" && (
+        <Rise>
+          <Card style={{ gap: 10 }}>
+            <Txt variant="h2">Who joins the circle?</Txt>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {["parent", "relative", "neighbour", "secretary", "poa", "caregiver"].map((r) => <Chip key={r} label={ROLE[r]} on={form.role === r} onPress={() => setForm({ ...form, role: r })} />)}
+            </View>
+            <TextInput accessibilityLabel="Name" placeholder="Name" placeholderTextColor={c.placeholder} value={form.name} onChangeText={(v) => setForm({ ...form, name: v })} style={input} />
+            <TextInput accessibilityLabel="City" placeholder="City" placeholderTextColor={c.placeholder} value={form.city} onChangeText={(v) => setForm({ ...form, city: v })} style={input} />
+            <TextInput accessibilityLabel="Phone" placeholder="Phone (+91…)" placeholderTextColor={c.placeholder} keyboardType="phone-pad" value={form.phone} onChangeText={(v) => setForm({ ...form, phone: v })} style={input} />
+            <TextInput accessibilityLabel="Blood group" placeholder="Blood group" placeholderTextColor={c.placeholder} value={form.blood_group} onChangeText={(v) => setForm({ ...form, blood_group: v })} style={input} />
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <Txt style={{ flex: 1 }}>Alert this person first in an emergency</Txt>
+              <Switch value={form.is_emergency_contact} onValueChange={(v) => setForm({ ...form, is_emergency_contact: v })} trackColor={{ true: c.parrot, false: c.line }} thumbColor="#fff" />
+            </View>
+            <Btn label={busy ? "Adding…" : "Add to circle"} disabled={busy || !form.name.trim()} onPress={add} />
           </Card>
-        ))}
-      </View>
+        </Rise>
+      )}
+
+      {view === "access" && (
+        <Rise>
+          <View style={{ gap: 14 }}>
+            <Members sess={sess} />
+            <Txt variant="h2">Who can see what</Txt>
+            {active.length === 0 && <Card><Txt variant="muted">No active permissions. Nobody but you can see sensitive data.</Txt></Card>}
+            {active.map((x) => (
+              <Card key={x.grantee + x.scope} style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <Ionicons name="key" size={20} color={isDark() ? c.teal : c.marigold} />
+                <Txt style={{ flex: 1, fontSize: 14 }}><Text style={{ fontFamily: f.bold }}>{x.grantee}</Text> can <Text style={{ fontFamily: f.bold }}>{x.scope}</Text>{x.expires_at ? ` until ${new Date(x.expires_at).toLocaleTimeString()}` : ""}</Txt>
+                <Btn small kind="ghost" label="Revoke" onPress={() => revoke(x.grantee, x.scope)} />
+              </Card>
+            ))}
+          </View>
+        </Rise>
+      )}
+      <ErrorText>{err}</ErrorText>
     </Screen>
   );
 }

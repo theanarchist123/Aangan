@@ -16,6 +16,7 @@ const store = {
 
 const AUTH = "aangan.auth";
 const SERVER = "aangan.server";
+const SERVER_BASE = "aangan.server.base"; // the built-in address in force when a custom one was saved
 const FAMILY = "aangan.family";
 
 let cached: AuthSession | null = null;
@@ -25,12 +26,21 @@ export const onAuthChange = (fn: () => void) => { listeners.add(fn); return () =
 const emit = () => listeners.forEach((fn) => fn());
 
 export const getServer = () => server;
-export async function setServer(url: string) { server = url.trim().replace(/\/+$/, "") || DEFAULT_API; await store.set(SERVER, server); }
+export async function setServer(url: string) {
+  server = url.trim().replace(/\/+$/, "") || DEFAULT_API;
+  // Only an address the user really changed is remembered, otherwise a newer build could never move to a new server.
+  if (server === DEFAULT_API) await store.del(SERVER);
+  else { await store.set(SERVER, server); await store.set(SERVER_BASE, DEFAULT_API); }
+}
 export const getUser = () => cached?.user ?? null;
 
 export async function restore(): Promise<AuthSession | null> {
   try {
-    server = (await store.get(SERVER)) || DEFAULT_API;
+    const custom = await store.get(SERVER);
+    // A saved address is only valid for the build it was typed into. If the built-in one has changed, drop it.
+    const current = !!custom && (await store.get(SERVER_BASE)) === DEFAULT_API;
+    server = current ? custom! : DEFAULT_API;
+    if (custom && !current) await store.del(SERVER);
     const raw = await store.get(AUTH);
     cached = raw ? (JSON.parse(raw) as AuthSession) : null;
   } catch { cached = null; }
